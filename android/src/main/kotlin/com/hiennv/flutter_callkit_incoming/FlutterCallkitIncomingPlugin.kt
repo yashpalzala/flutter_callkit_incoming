@@ -375,6 +375,14 @@ class FlutterCallkitIncomingPlugin : FlutterPlugin, MethodCallHandler, ActivityA
                 "setAudioRoute" -> {
                     result.success(true)
                 }
+                "checkShowOnLockScreenPermission" ->{
+                   val permRes = callkitNotificationManager?.checkForShowOnLockScreenPermission()
+                    result.success(permRes)
+                }
+                "redirectToSettingsPage" ->{
+                    callkitNotificationManager?.redirectToSettingsPage(activity)
+result.success("OK")
+                }
             }
         } catch (error: Exception) {
             result.error("error", error.message, "")

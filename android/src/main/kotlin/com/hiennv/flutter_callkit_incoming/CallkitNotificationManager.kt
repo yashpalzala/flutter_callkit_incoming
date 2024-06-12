@@ -3,23 +3,30 @@ package com.hiennv.flutter_callkit_incoming
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.AppOpsManager
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
+import android.content.Context.APP_OPS_SERVICE
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.media.RingtoneManager
 import android.net.Uri
+import android.os.Binder
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.os.PowerManager
 import android.provider.Settings
 import android.text.TextUtils
 import android.text.format.DateFormat
 import android.view.View
+import android.view.WindowManager
 import android.widget.RemoteViews
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
@@ -27,6 +34,11 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.Person
 import java.util.Date
+import androidx.core.content.ContextCompat.startActivity
+import com.hiennv.flutter_callkit_incoming.widgets.CircleTransform
+import okhttp3.OkHttpClient
+import java.lang.reflect.Method
+import android.util.Log
 
 
 class CallkitNotificationManager(
@@ -345,6 +357,15 @@ class CallkitNotificationManager(
         val notification = notificationBuilder?.build()
 
         return notification?.let { CallkitNotification(notificationId, it) }
+        if(!checkForShowOnLockScreenPermission()){
+            
+            val mPowerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+            val mWakeLock: PowerManager.WakeLock = mPowerManager.newWakeLock(
+                PowerManager.SCREEN_BRIGHT_WAKE_LOCK or PowerManager.ACQUIRE_CAUSES_WAKEUP,
+                "App:IncomingCall"
+            )
+            mWakeLock.acquire(1*60*1000L /*1 minute*/)
+        }   
     }
 
     private fun initInComingNotificationViews(
@@ -1134,6 +1155,52 @@ class CallkitNotificationManager(
     fun destroy() {
 
         callkitSoundPlayerManager?.destroy()
+    }
+    fun checkForShowOnLockScreenPermission():Boolean {
+
+            return try {
+                val manager = context.getSystemService(APP_OPS_SERVICE) as AppOpsManager
+                val method: Method = AppOpsManager::class.java.getDeclaredMethod(
+                    "checkOpNoThrow",
+                    Int::class.javaPrimitiveType,
+                    Int::class.javaPrimitiveType,
+                    String::class.java
+                )
+                val result =
+                    method.invoke(manager, 10020, Binder.getCallingUid(), context.packageName) as Int
+                AppOpsManager.MODE_ALLOWED == result
+            } catch (e: Exception) {
+
+                Log.i("ERR", "===== error occured in checkForShowOnLockScreenPermission() ======", e)
+
+                false
+            }
+
+    }
+
+    fun redirectToSettingsPage(activity: Activity?) {
+       try {
+
+               activity.let {
+
+                   val intent = Intent(
+                       Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                       Uri.fromParts("package", it?.packageName, null)
+                   )
+                   intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                   context.startActivity(intent)
+               }
+
+
+       }catch (e: Exception){
+
+           Log.i("ERR", "===== error occured in redirectToSettingsPage() ======")
+           Log.i("ERR", "===== errmsg: ${e.message} ======", )
+           Log.i("ERR", "===== errCause: ${e.cause} ======", e)
+           e.printStackTrace()
+
+       }
+
     }
 
 }

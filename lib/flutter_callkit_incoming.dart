@@ -145,6 +145,14 @@ class FlutterCallkitIncoming {
     return await _channel.invokeMethod("canUseFullScreenIntent");
   }
 
+  static Future checkShowOnLockScreenPermission() async {
+    return await _channel.invokeMethod("checkShowOnLockScreenPermission");
+  }
+
+  static Future redirectToSettingsPage() async {
+    return await _channel.invokeMethod("redirectToSettingsPage");
+  }
+
   static CallEvent? _receiveCallEvent(dynamic data) {
     Event? event;
     Map<String, dynamic> body = {};

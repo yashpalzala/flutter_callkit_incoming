@@ -1,7 +1,6 @@
 package com.hiennv.flutter_callkit_incoming
 
 import android.app.Activity
-import android.app.ActivityManager
 import android.app.KeyguardManager
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -13,7 +12,11 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.PowerManager
+import android.text.TextUtils
+import android.util.Log
 import android.view.View
+import android.view.ViewGroup.MarginLayoutParams
 import android.view.Window
 import android.view.WindowManager
 import android.view.animation.AnimationUtils
@@ -21,15 +24,11 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import com.hiennv.flutter_callkit_incoming.widgets.RippleRelativeLayout
+import com.squareup.picasso.OkHttp3Downloader
 import com.squareup.picasso.Picasso
 import de.hdodenhof.circleimageview.CircleImageView
-import kotlin.math.abs
 import okhttp3.OkHttpClient
-import com.squareup.picasso.OkHttp3Downloader
-import android.view.ViewGroup.MarginLayoutParams
-import android.os.PowerManager
-import android.text.TextUtils
-import android.util.Log
+import kotlin.math.abs
 
 
 class CallkitIncomingActivity : Activity() {
@@ -93,6 +92,7 @@ class CallkitIncomingActivity : Activity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
             window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
             setTurnScreenOn(true)
+            setShowWhenLocked(true)
         } else {
             window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
             window.addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON)

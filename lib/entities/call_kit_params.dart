@@ -9,24 +9,24 @@ part 'call_kit_params.g.dart';
 /// Object config for General.
 @JsonSerializable(explicitToJson: true)
 class CallKitParams {
-  const CallKitParams({
-    this.id,
-    this.nameCaller,
-    this.appName,
-    this.avatar,
-    this.handle,
-    this.type,
-    this.normalHandle,
-    this.duration,
-    this.textAccept,
-    this.textDecline,
-    this.missedCallNotification,
-    this.callingNotification,
-    this.extra,
-    this.headers,
-    this.android,
-    this.ios,
-  });
+  const CallKitParams(
+      {this.id,
+      this.nameCaller,
+      this.appName,
+      this.avatar,
+      this.handle,
+      this.type,
+      this.normalHandle,
+      this.duration,
+      this.textAccept,
+      this.textDecline,
+      this.missedCallNotification,
+      this.callingNotification,
+      this.extra,
+      this.headers,
+      this.android,
+      this.ios,
+      this.onDecline});
 
   final String? id;
   final String? nameCaller;
@@ -44,6 +44,9 @@ class CallKitParams {
   final Map<String, dynamic>? headers;
   final AndroidParams? android;
   final IOSParams? ios;
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  final Function(String reason)? onDecline;
 
   factory CallKitParams.fromJson(Map<String, dynamic> json) =>
       _$CallKitParamsFromJson(json);

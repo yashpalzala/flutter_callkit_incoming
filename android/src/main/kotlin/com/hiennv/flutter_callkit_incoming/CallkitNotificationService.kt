@@ -45,9 +45,21 @@ class CallkitNotificationService : Service() {
 
     }
 
-    // Get notification manager dynamically to handle plugin lifecycle properly
+    // Falls back to a locally-built manager when no Flutter engine is attached yet
+    // (e.g. the app process was killed and this service was cold-started by the
+    // Accept action's PendingIntent). startForeground() must be called within the
+    // OS's timeout regardless of Flutter engine state, or the system throws
+    // ForegroundServiceDidNotStartInTimeException and kills the app.
+    private var fallbackNotificationManager: CallkitNotificationManager? = null
+
     private fun getCallkitNotificationManager(): CallkitNotificationManager? {
-        return FlutterCallkitIncomingPlugin.getInstance()?.getCallkitNotificationManager()
+        FlutterCallkitIncomingPlugin.getInstance()?.getCallkitNotificationManager()?.let {
+            return it
+        }
+        return fallbackNotificationManager ?: CallkitNotificationManager(
+            applicationContext,
+            CallkitSoundPlayerManager(applicationContext)
+        ).also { fallbackNotificationManager = it }
     }
 
 
